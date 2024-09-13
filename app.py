@@ -6,6 +6,8 @@ import nbformat
 from nbconvert import HTMLExporter
 import logging
 import base64
+from streamlit_option_menu import option_menu
+from PIL import Image, ImageOps, ImageDraw
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -13,23 +15,18 @@ logging.basicConfig(level=logging.INFO)
 # Load the trained model, scaler, and dataset
 model, scaler, dataset = main()
 
-# Streamlit app configuration
+# Streamlit app
 st.set_page_config(page_title="Energy Consumption Prediction", layout="wide")
 
-st.title("Energy Consumption Prediction")
-st.markdown("""
-    <style>
-    h1 {
-        color: white;
-    }
-    </style>
-    Welcome to the Energy Consumption Prediction app. 
-    Enter a year to predict the energy consumption for that year.
-""", unsafe_allow_html=True)
-
-# Sidebar for additional sections
-st.sidebar.header("Navigation")
-page = st.sidebar.radio("Go to", ["Prediction", "About", "Jupyter Notebook"])
+# Sidebar for navigation
+with st.sidebar:
+    selected = option_menu(
+        menu_title="Main Menu",
+        options=["Home", "About", "Jupyter Notebook"],
+        icons=["house", "info-circle", "book"],
+        menu_icon="cast",
+        default_index=0,
+    )
 
 # Function to convert Jupyter notebook to HTML
 def convert_notebook_to_html(notebook_path):
@@ -54,8 +51,13 @@ def img_to_base64(image_path):
         logging.error(f"Error converting image to base64: {str(e)}")
         return None
 
-# Prediction Page
-if page == "Prediction":
+# Home Page
+if selected == "Home":
+    st.title("Energy Consumption Prediction")
+    st.markdown("""
+        Welcome to the Energy Consumption Prediction app. 
+        Enter a year to predict the energy consumption for that year.
+    """)
     st.header("Enter Year for Prediction")
     year = st.number_input("Year", min_value=2023, max_value=2073, value=2023)
 
@@ -83,67 +85,45 @@ if page == "Prediction":
             st.error(f"Error: {e}")
 
 # About Page
-elif page == "About":
-    st.header("About")
+elif selected == "About":
+    st.title("About")
     st.markdown("""
         ## Energy Consumption Prediction App
         This app predicts the energy consumption for a given year using a Support Vector Machine (SVM) model.
         
-        **GitHub**: [Your GitHub Repository](https://github.com/your-repo)
+        **GitHub**: [SVM REPO](https://github.com/AkshanshAnant/SVM-ENERGY-PREDICT)
         
-        **Author**: Your Name
+        **Authors**: [Akshansh Anant](https://github.com/AkshanshAnant) & [Aditya Tomar](https://github.com/ascendantaditya)
     """)
 
 # Jupyter Notebook Page
-elif page == "Jupyter Notebook":
-    st.header("Jupyter Notebook")
+elif selected == "Jupyter Notebook":
+    st.title("Jupyter Notebook")
     st.markdown("### SVM Model Notebook")
     display_notebook("svm.ipynb")
 
-# Custom CSS for dark mode styling
+# Custom CSS for styling
 st.markdown("""
     <style>
     .main {
-        background-color: black;
+        background-color: #0E1117; /* Streamlit's dark blue background */
         color: white;
     }
     .sidebar .sidebar-content {
-        background-color: black;
+        background-color: #0E1117; /* Streamlit's dark blue background */
         color: white;
     }
     .stTextInput, .stNumberInput, .stButton, .stMarkdown, .stDataFrame, .stExpander, .stHeader, .stSubheader {
-        color: white !important;
-    }
-    .stDataFrame {
-        background-color: black;
-    }
-    .cover-glow {
-        width: 100%;
-        height: auto;
-        padding: 3px;
-        box-shadow: 
-            0 0 5px #330000,
-            0 0 10px #660000,
-            0 0 15px #990000,
-            0 0 20px #CC0000,
-            0 0 25px #FF0000,
-            0 0 30px #FF3333,
-            0 0 35px #FF6666;
-        position: relative;
-        z-index: -1;
-        border-radius: 45px;
-    }
-    .css-1inwz65 {
         color: white;
     }
     </style>
     """, unsafe_allow_html=True)
 
 # Load and display sidebar image
-img_path = "imgs/sidebar_streamly_avatar.png"
+img_path = "sidebar.jpg"
 img_base64 = img_to_base64(img_path)
 if img_base64:
     st.sidebar.markdown(
-        f'<img src="data:image/png;base64,{img_base64}" class="cover-glow">',
+        f'<img src="data:image/png;base64,{img_base64}">',
         unsafe_allow_html=True,
     )
